@@ -1,0 +1,6 @@
+.env*
+.git
+database/
+pages/
+README.md
+.htaccess
