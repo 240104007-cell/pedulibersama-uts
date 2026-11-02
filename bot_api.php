@@ -55,6 +55,103 @@ if (!function_exists('buat_text_progress_bar')) {
 
 switch ($action) {
     /**
+     * 0. Action 'chat': Pemroses Utama Pesan Telegram untuk n8n
+     * Menerima { text, chat_id, from_name } dan mengembalikan respon instan
+     * Endpoint: POST /bot_api.php?action=chat atau GET /bot_api.php?action=chat&text=...
+     */
+    case 'chat':
+    case 'process':
+        $body = json_decode(file_get_contents('php://input'), true) ?? [];
+        $rawText = trim($body['text'] ?? $_POST['text'] ?? $_GET['text'] ?? '');
+        $chatId = $body['chat_id'] ?? $_POST['chat_id'] ?? $_GET['chat_id'] ?? '';
+        $fromName = trim($body['from_name'] ?? $_POST['from_name'] ?? $_GET['from_name'] ?? 'Sahabat');
+        if (empty($fromName)) $fromName = 'Sahabat';
+
+        $lower = strtolower($rawText);
+        $replyText = '';
+        $replyMarkup = [];
+
+        // 1. Menu Start / Halo
+        if ($lower === '' || str_starts_with($lower, '/start') || $lower === 'halo' || $lower === 'hai' || $lower === 'menu' || $lower === '/bantuan') {
+            $replyText = "👋 *Halo, {$fromName}!*\n\n";
+            $replyText .= "Selamat datang di Bot Resmi *PeduliBersama* — Platform Donasi & Penggalangan Dana Terbuka.\n\n";
+            $replyText .= "Melalui bot ini, Anda dapat melihat program donasi aktif, memantau capaian dana secara real-time, dan berdonasi langsung ke website resmi kami.\n\n";
+            $replyText .= "Silakan pilih menu di bawah ini:";
+
+            $replyMarkup = [
+                'inline_keyboard' => [
+                    [
+                        ['text' => '📋 Daftar Program Donasi', 'callback_data' => 'cmd_program']
+                    ],
+                    [
+                        ['text' => '🌐 Kunjungi Website Resmi', 'url' => $webBaseUrl],
+                        ['text' => '❓ Bantuan', 'callback_data' => 'cmd_help']
+                    ]
+                ]
+            ];
+        }
+        // 2. Daftar Program Donasi
+        elseif (str_starts_with($lower, '/program') || $lower === 'cmd_program' || str_contains($lower, 'program') || str_contains($lower, 'donasi')) {
+            $campaigns = fetch_campaigns('', 'aktif', 6);
+            $replyText = "🌟 *PROGRAM DONASI TERSEDIA* 🌟\n";
+            $replyText .= "Platform PeduliBersama (Live Supabase)\n\n";
+
+            if (empty($campaigns)) {
+                $replyText .= "Saat ini belum ada program donasi aktif.\nSilakan kunjungi website kami untuk info terbaru.";
+            } else {
+                foreach ($campaigns as $idx => $c) {
+                    $progress = hitung_progress($c['dana_terkumpul'] ?? 0, $c['target_dana'] ?? 1);
+                    $detailUrl = $webBaseUrl . '/detail_kampanye.php?id=' . urlencode($c['id']);
+                    $progressBar = buat_text_progress_bar($progress, 8);
+                    $nomor = $idx + 1;
+
+                    $replyText .= "*{$nomor}. {$c['judul']}*\n";
+                    $replyText .= "📂 Kategori: _{$c['kategori']}_\n";
+                    $replyText .= "💰 Terkumpul: *" . format_rupiah($c['dana_terkumpul'] ?? 0) . "* (" . round($progress, 1) . "%)\n";
+                    $replyText .= "🎯 Target: " . format_rupiah($c['target_dana'] ?? 0) . "\n";
+                    $replyText .= "{$progressBar}\n";
+                    $replyText .= "👉 [Donasi Sekarang di Web]({$detailUrl})\n\n";
+                }
+                $replyText .= "ℹ️ _Ketik nama program untuk mencari atau klik link donasi di atas._";
+            }
+
+            $replyMarkup = [
+                'inline_keyboard' => [
+                    [
+                        ['text' => '🌐 Buka Semua Program di Website', 'url' => $webBaseUrl . '/kampanye.php']
+                    ]
+                ]
+            ];
+        }
+        // 3. Fallback / Pesan Tidak Dikenali
+        else {
+            $replyText = "❓ *Pesan Tidak Dikenali*\n\n";
+            $replyText .= "Maaf, saya belum memahami pesan Anda: \"_{$rawText}_\"\n\n";
+            $replyText .= "Silakan pilih salah satu opsi bantuan berikut:";
+
+            $replyMarkup = [
+                'inline_keyboard' => [
+                    [
+                        ['text' => '📋 Lihat Daftar Program', 'callback_data' => 'cmd_program']
+                    ],
+                    [
+                        ['text' => '🌐 Kunjungi Website Resmi', 'url' => $webBaseUrl]
+                    ]
+                ]
+            ];
+        }
+
+        echo json_encode([
+            'status' => 'success',
+            'chat_id' => $chatId,
+            'from_name' => $fromName,
+            'raw_text' => $rawText,
+            'reply_text' => $replyText,
+            'reply_markup' => $replyMarkup
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        break;
+
+    /**
      * 1. Ambil daftar program donasi aktif
      * Endpoint: GET /bot_api.php?action=list atau action=programs
      */
