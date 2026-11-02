@@ -1,0 +1,330 @@
+{
+  "name": "PeduliBersama - Telegram Bot Integration Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "callback_query"
+        ],
+        "additionalFields": {}
+      },
+      "id": "node-telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "pedulibersama-telegram-webhook",
+      "notesInFlow": true,
+      "notes": "Menerima pesan teks & klik tombol dari Telegram"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalisasi input dari Telegram (pesan teks atau tombol callback)\nconst item = $input.item.json;\nlet text = '';\nlet chatId = '';\nlet fromName = '';\nlet callbackQueryId = null;\n\nif (item.callback_query) {\n  text = item.callback_query.data || '';\n  chatId = item.callback_query.message.chat.id;\n  fromName = item.callback_query.from.first_name || 'Sahabat';\n  callbackQueryId = item.callback_query.id;\n} else if (item.message) {\n  text = (item.message.text || '').trim();\n  chatId = item.message.chat.id;\n  fromName = item.message.from.first_name || 'Sahabat';\n}\n\nlet command = 'unknown';\nlet query = '';\n\nif (text === '/start' || text.toLowerCase() === 'halo' || text.toLowerCase() === 'hai') {\n  command = 'start';\n} else if (text === '/program' || text === 'cmd_program' || text.toLowerCase().includes('program') || text.toLowerCase().includes('donasi')) {\n  command = 'program';\n} else if (text.startsWith('/detail') || text.startsWith('cmd_detail_')) {\n  command = 'detail';\n  query = text.replace('cmd_detail_', '').replace('/detail', '').trim();\n} else if (text.startsWith('/cari') || text.startsWith('cmd_cari_')) {\n  command = 'search';\n  query = text.replace('cmd_cari_', '').replace('/cari', '').trim();\n} else if (text === '/bantuan' || text === 'cmd_bantuan') {\n  command = 'help';\n}\n\nreturn {\n  chatId,\n  fromName,\n  rawText: text,\n  command,\n  query,\n  callbackQueryId\n};"
+      },
+      "id": "node-parse-input",
+      "name": "Parse Perintah User",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.command }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "start",
+              "outputKey": "start"
+            },
+            {
+              "value2": "program",
+              "outputKey": "program"
+            },
+            {
+              "value2": "detail",
+              "outputKey": "detail"
+            },
+            {
+              "value2": "search",
+              "outputKey": "search"
+            },
+            {
+              "value2": "help",
+              "outputKey": "help"
+            }
+          ]
+        },
+        "fallbackOutput": "unknown"
+      },
+      "id": "node-switch-command",
+      "name": "Router Perintah",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        640,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Perintah User').item.json.chatId }}",
+        "text": "=👋 *Halo, {{ $('Parse Perintah User').item.json.fromName }}!*\n\nSelamat datang di Bot Resmi *PeduliBersama* — Platform Donasi & Penggalangan Dana Terbuka.\n\nMelalui bot ini, Anda dapat melihat program donasi aktif, memantau capaian dana secara real-time, dan berdonasi langsung ke website resmi kami.\n\nSilakan pilih menu di bawah ini untuk memulai:",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "reply_markup": {
+            "inline_keyboard": [
+              [
+                {
+                  "text": "📋 Daftar Program Donasi",
+                  "callback_data": "cmd_program"
+                }
+              ],
+              [
+                {
+                  "text": "🌐 Kunjungi Website Resmi",
+                  "url": "https://donasi-platform.vercel.app"
+                },
+                {
+                  "text": "❓ Bantuan",
+                  "callback_data": "cmd_bantuan"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "id": "node-send-start",
+      "name": "Kirim Menu Start",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        940,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://donasi-platform.vercel.app/bot_api.php?action=list",
+        "options": {}
+      },
+      "id": "node-http-list",
+      "name": "Ambil Data Program (HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        940,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Perintah User').item.json.chatId }}",
+        "text": "={{ $json.telegram_message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "reply_markup": {
+            "inline_keyboard": [
+              [
+                {
+                  "text": "🌐 Buka Semua di Website",
+                  "url": "https://donasi-platform.vercel.app/kampanye.php"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "id": "node-send-program",
+      "name": "Kirim Daftar Program",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1160,
+        250
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://donasi-platform.vercel.app/bot_api.php?action=detail&id={{ $('Parse Perintah User').item.json.query }}",
+        "options": {}
+      },
+      "id": "node-http-detail",
+      "name": "Ambil Detail Program (HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        940,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Perintah User').item.json.chatId }}",
+        "text": "={{ $json.telegram_message }}",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "reply_markup": {
+            "inline_keyboard": [
+              [
+                {
+                  "text": "❤️ Donasi Sekarang di Web",
+                  "url": "={{ $json.data.url_detail }}"
+                }
+              ],
+              [
+                {
+                  "text": "⬅️ Kembali ke Daftar Program",
+                  "callback_data": "cmd_program"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "id": "node-send-detail",
+      "name": "Kirim Detail Program",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1160,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Parse Perintah User').item.json.chatId }}",
+        "text": "=❓ *Pesan Tidak Dikenali*\n\nMaaf, kami belum memahami pesan Anda: \"_{{ $('Parse Perintah User').item.json.rawText }}_\"\n\nSilakan pilih opsi berikut untuk mendapatkan informasi donasi yang sesuai:",
+        "additionalFields": {
+          "parse_mode": "Markdown",
+          "reply_markup": {
+            "inline_keyboard": [
+              [
+                {
+                  "text": "📋 Lihat Program Donasi",
+                  "callback_data": "cmd_program"
+                }
+              ],
+              [
+                {
+                  "text": "🌐 Kunjungi Portal Website",
+                  "url": "https://donasi-platform.vercel.app"
+                }
+              ]
+            ]
+          }
+        }
+      },
+      "id": "node-send-fallback",
+      "name": "Kirim Balasan Default (Fallback)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        940,
+        550
+      ]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Perintah User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Perintah User": {
+      "main": [
+        [
+          {
+            "node": "Router Perintah",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Router Perintah": {
+      "main": [
+        [
+          {
+            "node": "Kirim Menu Start",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ambil Data Program (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ambil Detail Program (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ambil Data Program (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kirim Menu Start",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Kirim Balasan Default (Fallback)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ambil Data Program (HTTP)": {
+      "main": [
+        [
+          {
+            "node": "Kirim Daftar Program",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ambil Detail Program (HTTP)": {
+      "main": [
+        [
+          {
+            "node": "Kirim Detail Program",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
