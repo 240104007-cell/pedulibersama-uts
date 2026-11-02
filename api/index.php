@@ -52,7 +52,8 @@ $allowedPages = [
     'tambah_kampanye',
     'edit_kampanye',
     'hapus_kampanye',
-    'proses_donasi'
+    'proses_donasi',
+    'bot_api'
 ];
 
 $page = str_ends_with($path, '.php') ? substr($path, 0, -4) : $path;
