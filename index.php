@@ -39,6 +39,9 @@ $kampanye_list = fetch_campaigns($search, 'aktif', 6);
                     <a href="kampanye.php" class="btn btn-light btn-lg px-4 fw-bold shadow-sm">
                         <i class="bi bi-heart-fill text-danger me-1"></i> Donasi Sekarang
                     </a>
+                    <a href="https://t.me/PeduliBersama_bot" target="_blank" rel="noopener" class="btn btn-outline-light btn-lg px-4 fw-semibold">
+                        <i class="bi bi-telegram me-1 text-info"></i> Chat di Telegram
+                    </a>
                     <?php if (is_logged_in()): ?>
                         <a href="tambah_kampanye.php" class="btn btn-outline-light btn-lg px-4 fw-semibold">
                             <i class="bi bi-plus-circle me-1"></i> Galang Dana
@@ -225,6 +228,38 @@ $kampanye_list = fetch_campaigns($search, 'aktif', 6);
                     <div class="stat-icon mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem;"><i class="bi bi-receipt"></i></div>
                     <h5 class="fw-bold">Laporan Terbuka</h5>
                     <p class="text-muted small mb-0">Donatur mendapatkan transparansi penggunaan dana secara berkala hingga program selesai.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Telegram Bot Feature Section Banner -->
+<section class="container py-4">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #1e3a8a 100%);">
+        <div class="card-body p-4 p-md-5 text-white position-relative">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-8">
+                    <div class="d-inline-flex align-items-center gap-2 bg-white bg-opacity-20 px-3 py-1 rounded-pill small fw-bold mb-3">
+                        <i class="bi bi-robot"></i> Integrasi Otomatisasi AI & n8n
+                    </div>
+                    <h2 class="fw-bold mb-2">Kini Tersedia: Layanan Cerdas PeduliBot di Telegram</h2>
+                    <p class="text-white-50 mb-4" style="max-width: 620px;">
+                        Pantau transparansi capaian dana donasi secara real-time, dapatkan rincian program bantuan aktif, atau konsultasikan niat kebaikan Anda langsung melalui Telegram.
+                    </p>
+                    <div class="d-flex gap-3 flex-wrap align-items-center">
+                        <a href="https://t.me/PeduliBersama_bot" target="_blank" rel="noopener" class="btn btn-warning btn-lg px-4 fw-bold rounded-pill shadow-sm">
+                            <i class="bi bi-telegram me-2 text-primary"></i>Buka @PeduliBersama_bot
+                        </a>
+                        <span class="text-white-50 small"><i class="bi bi-check-circle-fill text-success me-1"></i>Respons Cerdas 24 Jam</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-center d-none d-lg-block">
+                    <div class="p-4 rounded-4 bg-white bg-opacity-10 backdrop-blur d-inline-block shadow">
+                        <i class="bi bi-telegram display-1 text-white opacity-75"></i>
+                        <div class="mt-2 fw-bold text-white fs-5">@PeduliBersama_bot</div>
+                        <small class="text-white-50">Terkoneksi Realtime Database</small>
+                    </div>
                 </div>
             </div>
         </div>

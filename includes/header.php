@@ -34,6 +34,11 @@ require_once __DIR__ . '/../config/database.php';
                 <li class="nav-item">
                     <a class="nav-link px-3" href="kampanye.php"><i class="bi bi-megaphone me-1"></i>Kampanye</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 text-warning fw-semibold" href="https://t.me/PeduliBersama_bot" target="_blank" rel="noopener">
+                        <i class="bi bi-telegram me-1"></i>Bot Telegram
+                    </a>
+                </li>
             </ul>
             <ul class="navbar-nav">
                 <?php if (is_logged_in()): ?>

@@ -13,6 +13,7 @@
                 </div>
                 <p class="text-white-50 small mb-3">Platform penggalangan dana terpercaya untuk membantu sesama. Bersama kita bisa membuat perubahan nyata bagi Indonesia.</p>
                 <div class="d-flex gap-2">
+                    <a href="https://t.me/PeduliBersama_bot" target="_blank" rel="noopener" class="btn btn-outline-light btn-sm rounded-circle" title="Chat dengan Telegram Bot"><i class="bi bi-telegram text-info"></i></a>
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-facebook"></i></a>
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-instagram"></i></a>
                     <a href="#" class="btn btn-outline-light btn-sm rounded-circle"><i class="bi bi-twitter-x"></i></a>
@@ -37,11 +38,16 @@
                 </ul>
             </div>
             <div class="col-lg-3">
-                <h6 class="text-white fw-bold mb-3">Kontak</h6>
+                <h6 class="text-white fw-bold mb-3">Kontak & Layanan</h6>
                 <ul class="list-unstyled small text-white-50">
                     <li class="mb-2"><i class="bi bi-envelope me-2 text-warning"></i>info@pedulibersama.id</li>
                     <li class="mb-2"><i class="bi bi-telephone me-2 text-warning"></i>+62 812 3456 7890</li>
-                    <li class="mb-2"><i class="bi bi-geo-alt me-2 text-warning"></i>Jakarta, Indonesia</li>
+                    <li class="mb-2">
+                        <a href="https://t.me/PeduliBersama_bot" target="_blank" rel="noopener" class="text-white-50 text-decoration-none">
+                            <i class="bi bi-telegram me-2 text-info"></i>Bot Telegram: @PeduliBersama_bot
+                        </a>
+                    </li>
+                    <li class="mb-2"><i class="bi bi-geo-alt me-2 text-warning"></i>Surakarta & Jakarta, Indonesia</li>
                 </ul>
             </div>
         </div>
@@ -51,6 +57,15 @@
         </div>
     </div>
 </footer>
+
+<!-- Floating Telegram Bot Widget -->
+<a href="https://t.me/PeduliBersama_bot" target="_blank" rel="noopener" class="floating-telegram-btn" title="Chat dengan PeduliBot di Telegram">
+    <div class="telegram-icon-wrapper">
+        <i class="bi bi-telegram"></i>
+    </div>
+    <span class="telegram-text">Chat PeduliBot</span>
+    <span class="telegram-badge-online">Online</span>
+</a>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="assets/js/main.js"></script>
